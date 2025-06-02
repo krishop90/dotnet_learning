@@ -1,5 +1,6 @@
 using BooksApi.Models;
 using BooksApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BooksApi.Controllers
@@ -33,6 +34,7 @@ namespace BooksApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<Book>> CreateBook(Book book)
         {
             var createdBook = await _bookService.AddBookAsync(book);
@@ -40,6 +42,7 @@ namespace BooksApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin,manager")]
         public async Task<IActionResult> UpdateBook(int id, Book book)
         {
             var updatedBook = await _bookService.UpdateBookAsync(id, book);
@@ -50,6 +53,7 @@ namespace BooksApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteBook(int id)
         {
             var result = await _bookService.DeleteBookAsync(id);
@@ -59,4 +63,4 @@ namespace BooksApi.Controllers
             return NoContent();
         }
     }
-}   
+}

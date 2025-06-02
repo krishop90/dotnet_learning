@@ -15,6 +15,7 @@ namespace BooksApi.Services
 
         public async Task<IEnumerable<Book>> GetAllBooksAsync()
         {
+            var temp = _context.Books.Select(x => x.Title).ToList();
             return await _context.Books.ToListAsync();
         }
 
