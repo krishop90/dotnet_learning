@@ -15,9 +15,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials()
-              .SetIsOriginAllowed(origin => true)
-              .WithExposedHeaders("Content-Disposition");
+              .WithExposedHeaders("Content-Disposition")
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
+              .AllowCredentials();
     });
 });
 
@@ -73,7 +73,7 @@ using (var scope = app.Services.CreateScope())
                 {
                     Email = "admin@bookstore.com",
                     Password = "admin123",
-                    Role = UserRole.Admin
+                    Role = UserRole.Admin 
                 },
                 new User
                 {
@@ -109,4 +109,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+app.Run();  

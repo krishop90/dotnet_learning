@@ -6,5 +6,11 @@ namespace BooksApi.Services
     {
         Task<SignInResponse> SignInAsync(SignInRequest request);
         Task<SignInResponse> RegisterAsync(RegisterRequest request);
+        Task<UserListResponse> GetUsersAsync(
+            string? roleFilter = "user",
+            string search = "",
+            string sort = "asc",
+            int page = 1,
+            int pageSize = 10);
     }
 }

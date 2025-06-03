@@ -1,11 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using BooksApi.DTOs;
+﻿using BooksApi.DTOs;
 using BooksApi.Entities;
 using BooksApi.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace BooksApi.Services
 {
@@ -59,6 +60,72 @@ namespace BooksApi.Services
             {
                 AccessToken = token,
                 TokenType = "Bearer"
+            };
+        }
+
+        public async Task<IEnumerable<UserModel>> GetUsersAsync(string? roleFilter = "user")
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(roleFilter))
+            {
+                query = query.Where(u => u.Role == roleFilter);
+            }
+
+            var users = await query
+                .Select(u => new UserModel
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    Role = u.Role
+                })
+                .ToListAsync();
+
+            return users;
+        }
+
+        public async Task<UserListResponse> GetUsersAsync(
+            string? roleFilter = "user",
+            string search = "",
+            string sort = "asc",
+            int page = 1,
+            int pageSize = 10)
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(roleFilter))
+            {
+                query = query.Where(u => u.Role == roleFilter);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                query = query.Where(u => u.Email.ToLower().Contains(search));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            query = sort.ToLower() == "desc" 
+                ? query.OrderByDescending(u => u.Id)
+                : query.OrderBy(u => u.Id);
+
+            var users = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new UserModel
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    Role = u.Role
+                })
+                .ToListAsync();
+
+            return new UserListResponse
+            {
+                Users = users,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
             };
         }
 
